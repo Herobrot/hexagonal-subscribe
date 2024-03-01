@@ -1,5 +1,6 @@
 import { GetUserUseCase } from "../../application/getUserUseCase";
 import { Request, Response } from "express";
+import WebSocketService  from "../../../config/webSocket";
 import signale from "signale";
 
 export class GetUserController{
@@ -19,9 +20,26 @@ export class GetUserController{
                     message: "El usuario no existe o no es válido"
                 });
             }
-
             signale.success("El usuario es válido");
-            return res.status(200).json(user);
+            
+            const wsUrl = process.env.WS_URL!.toString();
+            const webSocketService = new WebSocketService({ wsUrl: wsUrl });
+        
+            
+        
+            try {
+                webSocketService.connect(user);
+
+                if(webSocketService){
+                    res.status(200).json({ message: 'Mensaje enviado al web socket' });
+                }
+                else{
+                    res.status(500).json({ message: 'Hubo un error al procesar la solicitud' });
+                }
+            } catch(error: any) {
+                signale.fatal(new Error('Error al enviar mensajes:'));
+                res.status(500).json({ message: 'Hubo un error al procesar la solicitud', error: error.message });
+            } 
         } catch (error: any) {
             signale.fatal(new Error("Error al obtener el usuario"), + error.message);
             return res.status(500).json({

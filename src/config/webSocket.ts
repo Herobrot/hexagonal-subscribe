@@ -13,11 +13,14 @@ class WebSocketService {
     this.config = config;
   }
 
-  connect() {
+  connect(user ?: any) {
     this.client = new WebSocket(this.config.wsUrl);
 
     this.client.on('open', () => {
       signale.success('Conectado a WebSocket');
+      signale.info('Enviando:', JSON.stringify(user));
+      this.sendMessage(JSON.stringify(user));
+      
     });
 
     this.client.on('message', (data) => {
@@ -25,12 +28,12 @@ class WebSocketService {
     });
 
     this.client.on('close', () => {
-      signale.warn('Desconectado de WebSocket');
-      this.client = null;
+      signale.warn('Desconectado de WebSocket, reintentando...');
     });
 
     this.client.on('error', (err) => {
-      signale.fatal('Error de WebSocket:', err);
+      signale.fatal(new Error('Error en WebSocket'), err);
+
     });
   }
 

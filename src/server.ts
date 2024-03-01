@@ -17,23 +17,6 @@ app.use(helmet())
 
 app.post('/user', getUserController.run.bind(getUserController));
 
-app.post('/', express.json(), async (req, res) => {
-    const { message } = req.body;
-    const wsUrl = process.env.WS_URL!.toString();
-    const webSocketService = new WebSocketService({ wsUrl: wsUrl });
-
-    webSocketService.connect();
-
-    try {
-        webSocketService.sendMessage(message);
-        
-        res.status(200).json({ message: 'Mensaje enviado al web socket' });
-    } catch(error: any) {
-        signale.fatal(new Error('Error al enviar mensajes:'));
-        res.status(500).json({ message: 'Hubo un error al procesar la solicitud', error: error.message });
-    } 
-});
-
 try{
     const port = process.env.PORT
 
